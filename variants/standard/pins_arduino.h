@@ -95,8 +95,15 @@ static const uint8_t A7 = 21;
 #if defined(__LGT8FX8P48__)
 static const uint8_t A8 = 23;
 static const uint8_t A9 = 24;
-static const uint8_t A10 = 25;
+// static const uint8_t A10 = 25; LGT8FXP and LGT8FXP48 both have A10 pin
 static const uint8_t A11 = 26;
+#define PIN_A8   (23)
+#define PIN_A9   (24)
+#define PIN_A11  (26)
+#endif
+#if defined(__LGT8FX8P__)
+static const uint8_t A10 = 25;
+#define PIN_A10   (25)
 #endif
 #endif
 
@@ -175,14 +182,15 @@ static const uint8_t A11 = 26;
 #define E0	22
 #define E2	23
 #define E4	24
-#define E5	25
-#define E6	26
+#define E5	26
+#define E6	25
 
 #define D22	22 	/* PE0 */
 #define D23	23	/* PE2 */
 #define D24	24	/* PE4 */
-#define D25	25	/* PE5 */
-#define D26	26	/* PE6 */
+#define D25	26	/* PE5 */
+#define D26	25	/* PE6 */
+#define C6      27      /* PC6 */
 #endif
 #endif
 
@@ -201,10 +209,12 @@ static const uint8_t A11 = 26;
 #define	PGAO	32
 #endif
 
-#define digitalPinToPCICR(p)    (((p) >= 0 && (p) <= 21) ? (&PCICR) : ((uint8_t *)0))
-#define digitalPinToPCICRbit(p) (((p) <= 7) ? 2 : (((p) <= 13) ? 0 : 1))
-#define digitalPinToPCMSK(p)    (((p) <= 7) ? (&PCMSK2) : (((p) <= 13) ? (&PCMSK0) : (((p) <= 21) ? (&PCMSK1) : ((uint8_t *)0))))
-#define digitalPinToPCMSKbit(p) (((p) <= 7) ? (p) : (((p) <= 13) ? ((p) - 8) : ((p) - 14)))
+#if defined(__LGT8F__)
+#define XCK_DDR   DDRD
+#define XCK_PORT  PORTD
+#define XCK_PIN   PIND
+#define XCK_BIT   (4)
+#endif
 
 #define digitalPinToInterrupt(p)  ((p) == 2 ? 0 : ((p) == 3 ? 1 : NOT_AN_INTERRUPT))
 
@@ -330,6 +340,7 @@ const uint8_t PROGMEM digital_pin_to_port_PGM[] = {
 	PE, /* 24 */
 	PE, /* 25 */
 	PE, /* 26 */
+	PC, /* 27 */
 #endif
 #endif
 };
@@ -381,11 +392,18 @@ const uint8_t PROGMEM digital_pin_to_bit_mask_PGM[] = {
 	_BV(0), /* 22, port E0 */
 	_BV(2), /* 23, port E2 */ 
 	_BV(4), /* 24, port E4 */
-	_BV(5), /* 25, port E5 */
-	_BV(6), /* 26, port E6 */
+	_BV(5), /* 26, port E5 */
+	_BV(6), /* 25, port E6 */
+	_BV(6), /* 27, port C6 */
 #endif
 #endif
 };
+
+#if defined(__LGT8FX8P__)
+const uint8_t PROGMEM port_to_PCMSK_PGM[] = { 0, 0, 0xFF & (uint16_t)&PCMSK0, 0xFF & (uint16_t)&PCMSK1, 0xFF & (uint16_t)&PCMSK2, 0xFF & (uint16_t)&PCMSK3, 0xFF & (uint16_t)&PCMSK4 };
+#else
+const uint8_t PROGMEM port_to_PCMSK_PGM[] = { 0, 0, 0xFF & (uint16_t)&PCMSK0, 0xFF & (uint16_t)&PCMSK1, 0xFF & (uint16_t)&PCMSK2, 0xFF & (uint16_t)&PCMSK3 };
+#endif
 
 const uint8_t PROGMEM digital_pin_to_timer_PGM[] = {
 	NOT_ON_TIMER, /* 0 - port D */
@@ -435,6 +453,11 @@ const uint8_t PROGMEM digital_pin_to_timer_PGM[] = {
 };
 
 #endif
+
+#define digitalPinToPCMSK(p) (uint8_t*)pgm_read_byte(port_to_PCMSK_PGM+pgm_read_byte(digital_pin_to_port_PGM+(p)))
+#define digitalPinToPCICRbit(p) (pgm_read_byte(digital_pin_to_port_PGM+(p))-2)
+#define digitalPinToPCMSKbit(n) __builtin_ctz(pgm_read_byte(digital_pin_to_bit_mask_PGM+(n)))
+#define digitalPinToPCICR(p)    (((p) >= 0 && (p) <= 39) ? (&PCICR) : ((uint8_t *)0))
 
 // These serial port names are intended to allow libraries and architecture-neutral
 // sketches to automatically default to the correct port name for a particular type
