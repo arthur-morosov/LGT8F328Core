@@ -13,8 +13,8 @@
           "architecture": "avr",
           "version": "0.0.1",
           "category": "lgt8fx",
-          "url": "https://github.com/arthur-morosov/LGT8F328Core/releases/download/v0.0.1/lgt8fx-0.0.1.zip",
-          "archiveFileName": "lgt8fx-0.0.1.zip",
+          "url": "https://github.com/arthur-morosov/LGT8F328Core/releases/download/v0.0.1/lgt8f328-0.0.1.zip",
+          "archiveFileName": "lgt8f328-0.0.1.zip",
           "checksum": "SHA-256:257b3305353ea773833271eadf99fb7f59b1e7823f93290f4b2561fb64c3338d",
           "size": "615499",
           "help": {
